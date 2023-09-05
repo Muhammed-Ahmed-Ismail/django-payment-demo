@@ -1,0 +1,1 @@
+from .activable_model import ActivableModel

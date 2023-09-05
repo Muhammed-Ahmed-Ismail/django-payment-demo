@@ -44,10 +44,15 @@ DJANGO_CORE_APPS = [
 
 THIRD_PARTY_APPS = [
     'rest_framework',
-    'rest_framework.authtoken'
+    'rest_framework.authtoken',
+    'django_extensions',
 ]
 
-CUSTOM_APPS = ['accounts']
+CUSTOM_APPS = [
+    'core',
+    'accounts',
+    'products',
+]
 INSTALLED_APPS = DJANGO_CORE_APPS + THIRD_PARTY_APPS + CUSTOM_APPS
 
 REST_FRAMEWORK = {
