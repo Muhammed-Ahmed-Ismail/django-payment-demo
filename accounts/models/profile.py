@@ -11,3 +11,10 @@ class Profile(TimeStampedModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     address = models.CharField()
 
+    @property
+    def name(self):
+        return self.user.name
+
+    @property
+    def email(self):
+        return self.user.email
