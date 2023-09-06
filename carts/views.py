@@ -23,6 +23,7 @@ class CartViewSet(viewsets.ModelViewSet):
     serializer_class = CartSerializer
     permission_classes = [IsAuthenticated, IsOwnerOfCart]
     queryset = Cart.objects.all()
+    http_method_names = ['get', 'post', 'put', 'patch', 'head', 'options', 'trace']
 
     def get_queryset(self):
         if not self.request.user.is_staff:
