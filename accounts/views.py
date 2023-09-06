@@ -36,6 +36,7 @@ class ProfileViewSet(ModelViewSet):
 
     @action(detail=False)
     def my_profile(self, request):
-        profile = Profile.objects.filter(user=request.user).first()
+        # profile = Profile.objects.filter(user=request.user).first()
+        profile = request.user.profile
         serializer = self.get_serializer(profile, many=False)
         return Response(data=serializer.data)

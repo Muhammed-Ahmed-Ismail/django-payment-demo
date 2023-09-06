@@ -14,3 +14,4 @@ def create_user_profile(*args, instance=None, created=None, **kwargs):
             user=instance
         )
         user_profile.save()
+

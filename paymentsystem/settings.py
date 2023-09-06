@@ -52,6 +52,7 @@ CUSTOM_APPS = [
     'core',
     'accounts',
     'products',
+    'carts',
 ]
 INSTALLED_APPS = DJANGO_CORE_APPS + THIRD_PARTY_APPS + CUSTOM_APPS
 

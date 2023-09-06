@@ -8,7 +8,7 @@ User = get_user_model()
 
 
 class Profile(TimeStampedModel):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     address = models.CharField()
 
     @property
