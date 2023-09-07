@@ -13,6 +13,7 @@ from .order_line import OrderLine
 
 from ..exceptions import OrderCreationException
 
+
 User = get_user_model()
 
 
@@ -30,6 +31,7 @@ class Order(TimeStampedModel):
 
     def create_order_from_cart(self, cart: Cart):
         cart_lines = cart.cart_lines.all()
+
         products_in_cart = cart.get_products_in_cart()
         product_objects = Product.objects.select_for_update().filter(id__in=products_in_cart)
 
@@ -52,3 +54,10 @@ class Order(TimeStampedModel):
             raise ProductOutOfStock()
         else:
             self.status = OrderStatus.PENDING
+            cart.current_order = self
+
+    def cancel(self, cart: Cart):
+        order_lines = self.order_lines.all()
+        for order_line in order_lines:
+            order_line.cancel()
+        cart.current_order = None

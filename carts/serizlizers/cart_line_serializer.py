@@ -10,11 +10,6 @@ class CartLineSerializer(serializers.ModelSerializer):
         model = CartLine
         # exclude = ['cart']
         fields = ['id', 'product', 'quantity']
-
-        # extra_kwargs = {
-        #
-        # }
-
     def validate(self, attrs):
 
         product = attrs['product'] if not self.instance or attrs.get('product') else self.instance.product

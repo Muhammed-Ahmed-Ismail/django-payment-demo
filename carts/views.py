@@ -26,12 +26,14 @@ class CartLineViewSet(viewsets.ModelViewSet):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_to_cart(request):
-    user_cart: Cart = request.user.cart
     cart_line_serializer = CartLineSerializer(data=request.data, context={'request': request})
     if cart_line_serializer.is_valid(raise_exception=True):
         cart_line_serializer.save()
         return Response(data=cart_line_serializer.data, status=status.HTTP_201_CREATED)
     return Response()
+
+
+
 
 
 class CartViewSet(viewsets.ModelViewSet):

@@ -8,6 +8,7 @@ User = get_user_model()
 
 class Cart(TimeStampedModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cart')
+    current_order = models.OneToOneField('orders.order', on_delete=models.SET_NULL, null=True)
 
     def check_product_in_cart(self, product_id):
         return product_id in self.get_products_in_cart()
@@ -21,3 +22,9 @@ class Cart(TimeStampedModel):
         cart_line_for_that_product = list(filter(lambda cart_line: cart_line.product.id == product_id, cart_lines))[0]
         cart_line_for_that_product.quantity += quantity
         cart_line_for_that_product.save()
+
+    def is_empty(self):
+        return len(self.cart_lines.all()) == 0
+
+    def is_cart_has_current_order(self):
+        return self.current_order is not None

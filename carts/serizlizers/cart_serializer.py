@@ -11,4 +11,4 @@ class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
 
-        fields = ['id', 'cart_lines']
+        fields = ['id', 'current_order', 'cart_lines']
