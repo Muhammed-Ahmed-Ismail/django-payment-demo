@@ -45,7 +45,7 @@ class Order(TimeStampedModel):
                             product=product,
                             quantity=cart_line.quantity
                         )
-
+                        product.save()
                     if product.quantity_in_stock < 0:
                         raise OrderCreationException()
         except OrderCreationException:
