@@ -47,5 +47,5 @@ def cancel_order(request):
     user_cart = request.user.cart
     if not user_cart.current_order:
         raise NoCurrentOrderException()
-    user_cart.current_order.cancel()
+    user_cart.current_order.cancel(user_cart)
     return Response(data={"message": "order canceled"})

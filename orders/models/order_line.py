@@ -13,5 +13,5 @@ class OrderLine(TimeStampedModel):
     quantity = models.IntegerField()
 
     def cancel(self):
-        self.product.quantity += self.quantity
+        self.product.quantity_in_stock += self.quantity
         self.product.save()

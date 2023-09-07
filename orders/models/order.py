@@ -55,9 +55,11 @@ class Order(TimeStampedModel):
         else:
             self.status = OrderStatus.PENDING
             cart.current_order = self
+            cart.save()
 
     def cancel(self, cart: Cart):
         order_lines = self.order_lines.all()
         for order_line in order_lines:
             order_line.cancel()
         cart.current_order = None
+        cart.save()
