@@ -11,3 +11,6 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['id', 'status', 'order_lines']
+        extra_kwargs = {
+            'status': {'read_only': True}
+        }
