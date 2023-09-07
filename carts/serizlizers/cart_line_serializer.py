@@ -24,12 +24,11 @@ class CartLineSerializer(serializers.ModelSerializer):
         quantity = attrs['quantity'] if not self.instance else self.context['request'].data.get('quantity')
         if quantity and product.quantity_in_stock < quantity:
             raise serializers.ValidationError(f'Can not handel this required quantity of {product.name}')
-        # if self.partial:
-        #     self.initial_data.update(attrs)
-        #     return self.initial_data
         return attrs
 
-        # def validate_quantity(self, value):
+    def validate_quantity(self, value):
+        if value < 0:
+            raise serializers.ValidationError('Can not put quantity as negative value')
 
     def create(self, data):
         user_cart = self.context['request'].user.cart

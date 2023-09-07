@@ -1,0 +1,2 @@
+class OrderCreationException(Exception):
+    pass
