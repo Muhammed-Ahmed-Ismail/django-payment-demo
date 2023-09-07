@@ -30,7 +30,7 @@ class Order(TimeStampedModel):
 
     def create_order_from_cart(self, cart: Cart):
         cart_lines = cart.cart_lines.all()
-        products_in_cart = {cart_line.product.id for cart_line in cart_lines}
+        products_in_cart = cart.get_products_in_cart()
         product_objects = Product.objects.select_for_update().filter(id__in=products_in_cart)
 
         try:

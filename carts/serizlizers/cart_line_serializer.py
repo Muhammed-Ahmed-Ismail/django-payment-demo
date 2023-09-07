@@ -29,9 +29,17 @@ class CartLineSerializer(serializers.ModelSerializer):
     def validate_quantity(self, value):
         if value < 0:
             raise serializers.ValidationError('Can not put quantity as negative value')
+        return value
 
     def create(self, data):
         user_cart = self.context['request'].user.cart
         current_cart_line = CartLine(**data, cart=user_cart)
         current_cart_line.save()
         return current_cart_line
+
+    def save(self, **kwargs):
+        user_cart = self.context['request'].user.cart
+        if user_cart.check_product_in_cart(self.initial_data['product']):
+            user_cart.add_quantity_to_cart_line(self.initial_data['product'], self.initial_data['quantity'])
+        else:
+            self.create(self.validated_data)
