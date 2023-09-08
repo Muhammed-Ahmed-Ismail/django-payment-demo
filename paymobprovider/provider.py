@@ -9,15 +9,23 @@ from paymobprovider.exceptions import ProviderException
 
 class PaymobProvider(PaymentProviderAbstract):
     auth_token: str = ""
+    payment_auth_token: str = ""
     payment_transaction: PaymentTransaction
-    order_id = None
+    order_id: int = None
 
     def __init__(self, name, payment_transaction):
         super().__init__(name)
         self.payment_transaction = payment_transaction
 
     def get_payment_session_url(self, request) -> str:
-        pass
+        paymob_iframe_id = os.environ.get('PAYMOB_IFRAME_ID')
+        self.run_paymob_card_payment_flow()
+        return f'https://accept.paymobsolutions.com/api/acceptance/iframes/{paymob_iframe_id}?payment_token={self.payment_auth_token}'
+
+    def run_paymob_card_payment_flow(self):
+        self.get_paymob_auth_token()
+        self.register_paymob_order()
+        self.request_payment_key()
 
     def is_payment_done(self) -> bool:
         pass
@@ -92,27 +100,40 @@ class PaymobProvider(PaymentProviderAbstract):
 
         amount_cents = self.payment_transaction.amount * 100
 
+        user = self.payment_transaction.user
         payment_key_req_payload = {
             "auth_token": self.auth_token,
             "amount_cents": amount_cents,
             "expiration": 3600,
             "order_id": self.order_id,
             "billing_data": {
-                "apartment": "803",
-                "email": "claudette09@exa.com",
-                "floor": "42",
-                "first_name": "Clifford",
-                "street": "Ethan Land",
-                "building": "8028",
-                "phone_number": "+86(8)9135210487",
-                "shipping_method": "PKG",
-                "postal_code": "01898",
-                "city": "Jaskolskiburgh",
-                "country": "CR",
-                "last_name": "Nicolas",
-                "state": "Utah"
+                "email": user.email,
+                "first_name": user.first_name or 'FOO',
+                "street": user.profile.address or 'FOO',
+                "last_name": user.last_name,
+                "integration_id": os.environ.get('PAYMOB_INTEGRATION_ID'),
+                "apartment": "NA",
+                "floor": "NA",
+                "building": "NA",
+                "phone_number": "NA",
+                "shipping_method": "NA",
+                "postal_code": "NA",
+                "city": "NA",
+                "country": "NA",
+                "state": "NA"
             },
             "currency": "EGP",
-            "integration_id": os.environ.get('PAYMOB_INTEGRATION_ID'),
             "lock_order_when_paid": "false"
         }
+
+        try:
+            payment_key_response = requests.post(payment_key_url, json=payment_key_req_payload,
+                                                 timeout=os.environ.get('TIMEOUT'))
+        except requests.exceptions.Timeout:
+            raise ProviderException('Time out')
+        if payment_key_response.status_code != 200:
+            raise ProviderException()
+
+        payment_url_token = json.loads(payment_key_response.text)['token']
+
+        self.payment_auth_token = payment_url_token
