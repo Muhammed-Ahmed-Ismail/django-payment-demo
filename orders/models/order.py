@@ -13,7 +13,6 @@ from .order_line import OrderLine
 
 from ..exceptions import OrderCreationException
 
-
 User = get_user_model()
 
 
@@ -29,12 +28,14 @@ class Order(TimeStampedModel):
 
     status = models.CharField(choices=OrderStatus.choices, default=OrderStatus.DRAFT)
 
+    total = models.DecimalField(decimal_places=2, max_digits=10, null=True)
+
     def create_order_from_cart(self, cart: Cart):
         cart_lines = cart.cart_lines.all()
 
         products_in_cart = cart.get_products_in_cart()
         product_objects = Product.objects.select_for_update().filter(id__in=products_in_cart)
-
+        total = 0
         try:
             with transaction.atomic():
                 for product in product_objects:
@@ -47,6 +48,7 @@ class Order(TimeStampedModel):
                             product=product,
                             quantity=cart_line.quantity
                         )
+                        total += cart_line.quantity * product.price
                         product.save()
                     if product.quantity_in_stock < 0:
                         raise OrderCreationException()
@@ -54,6 +56,8 @@ class Order(TimeStampedModel):
             raise ProductOutOfStock()
         else:
             self.status = OrderStatus.PENDING
+            self.total = total
+
             cart.current_order = self
             cart.save()
 

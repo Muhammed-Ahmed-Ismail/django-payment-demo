@@ -9,6 +9,15 @@ class PaymentTransactionStatus(models.TextChoices):
 
 
 class PaymentTransaction(TimeStampedModel):
-    order = models.ForeignKey('orders.Order', on_delete=models.CASCADE)
-    status = models.CharField(choices=PaymentTransactionStatus.choices)
+    order = models.ForeignKey('orders.Order', on_delete=models.CASCADE, related_name='payment_tran')
+    status = models.CharField(choices=PaymentTransactionStatus.choices, default=PaymentTransactionStatus.DRAFT)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+    provider_name = models.CharField(null=True)
+    provider_id = models.BigIntegerField(null=True)
+
+    def confirm_payment(self):
+        pass
+
+    @property
+    def user(self):
+        return self.order.user
