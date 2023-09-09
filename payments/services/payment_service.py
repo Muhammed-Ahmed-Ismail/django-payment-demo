@@ -1,3 +1,5 @@
+from rest_framework.request import Request
+
 from orders.exceptions import NoCurrentOrderException
 from payments.models import PaymentTransaction
 from payments.providers import PaymentProviderAbstract
@@ -16,9 +18,9 @@ class PaymentService:
         if not user_order:
             raise NoCurrentOrderException()
         payment_transaction = PaymentTransaction.objects.create(
-            order= user_order,
-            amount= user_order.get_total_amount_for_payment(),
-            provider_name= self.provider_name
+            order=user_order,
+            amount=user_order.get_total_amount_for_payment(),
+            provider_name=self.provider_name
         )
         self.provider = PaymentProviderFactory.get_payment_provider(self.provider_name, payment_transaction)
 
@@ -27,5 +29,9 @@ class PaymentService:
     def get_payment_session_link(self) -> str:
         return self.provider.get_payment_session_url()
 
-    def close_payment_session(self, request):
-        pass
+    def close_payment_session(self, request: Request):
+        self.provider = PaymentProviderFactory.get_payment_provider(self.provider_name)
+        self.provider.parse_webhook_response(request.data, hmac=request.query_params.get('hmac'))
+
+        if self.provider.is_payment_done():
+            pass

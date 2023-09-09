@@ -7,5 +7,5 @@ class PaymentProviderFactory:
     }
 
     @classmethod
-    def get_payment_provider(cls, name, transaction):
+    def get_payment_provider(cls, name, transaction=None):
         return cls.providers.get(name, 'paymob')(name, transaction)

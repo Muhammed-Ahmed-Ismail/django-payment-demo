@@ -1,19 +1,26 @@
+import hashlib
+import hmac
 import os
 import requests
 import json
 
 from payments.models import PaymentTransaction
 from payments.providers.payment_provider_abc import PaymentProviderAbstract
-from paymobprovider.exceptions import ProviderException
+from paymobprovider.exceptions import ProviderException, PaymobWrongHmac
 
 
 class PaymobProvider(PaymentProviderAbstract):
+    # sending req data
     auth_token: str = ""
     payment_auth_token: str = ""
     payment_transaction: PaymentTransaction
     order_id: int = None
 
-    def __init__(self, name, payment_transaction):
+    # response data
+    payment_transaction_identifier = None
+    is_payment_done: bool = False
+
+    def __init__(self, name, payment_transaction=None):
         super().__init__(name)
         self.payment_transaction = payment_transaction
 
@@ -30,8 +37,54 @@ class PaymobProvider(PaymentProviderAbstract):
     def is_payment_done(self) -> bool:
         pass
 
+    def parse_webhook_response(self, webhook_res, **kwargs):
+        if not self.validate_paymob_response(webhook_res, kwargs.get('hmac')):
+            print("wrong hmac")
+
+            raise PaymobWrongHmac()
+        print("ssssssssssssssssssssssssssssss")
+
     def get_payment_transaction(self) -> PaymentTransaction:
         pass
+
+    @classmethod
+    def validate_paymob_response(cls, paymob_response, received_hmac=None) -> bool:
+        if not received_hmac:
+            raise PaymobWrongHmac("missing hmac")
+        paymob_hmac = os.environ.get('PAYMOB_HMAC')
+
+        approving_keys_list = ['amount_cents', 'created_at', 'currency', 'error_occured', 'has_parent_transaction',
+                               'id',
+                               'integration_id', 'is_3d_secure', 'is_auth', 'is_capture', 'is_refunded',
+                               'is_standalone_payment', 'is_voided', 'order.id', 'owner', 'pending', 'source_data.pan',
+                               'source_data.sub_type', 'source_data.type', 'success']
+        con_values = ""
+        nested_objects_set = {'order.id', 'source_data.pan', 'source_data.sub_type', 'source_data.type'}
+
+        for resp_key in approving_keys_list:
+            if resp_key in nested_objects_set:
+                key_split = resp_key.split('.')
+                print(key_split)
+                print(paymob_response['obj'][key_split[0]][key_split[1]])
+                value = paymob_response['obj'][key_split[0]][key_split[1]]
+                if value == True:
+                    con_values += 'true'
+                elif value == False:
+                    con_values += 'false'
+                else:
+                    con_values += str(value)
+            else:
+                value = paymob_response['obj'][resp_key]
+                if value == True:
+                    con_values += 'true'
+                elif value == False:
+                    con_values += 'false'
+                else:
+                    con_values += str(value)
+        msg = bytes(con_values, 'utf-8')
+        key = bytes(paymob_hmac, 'utf-8')
+        hashed_data = hmac.new(key, msg, hashlib.sha512)
+        return hmac.compare_digest(hashed_data.hexdigest(), received_hmac)
 
     def mark_payment_transaction(self, identifier: int):
         self.payment_transaction.provider_id = identifier

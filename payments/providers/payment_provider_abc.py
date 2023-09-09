@@ -24,3 +24,7 @@ class PaymentProviderAbstract(ABC):
     @abstractmethod
     def mark_payment_transaction(self, identifier: int):
         pass
+
+    @abstractmethod
+    def parse_webhook_response(self, webhook_res, **kwargs):
+        pass
