@@ -39,7 +39,6 @@ class PaymobProvider(PaymentProviderAbstract):
 
     def parse_webhook_response(self, webhook_res, **kwargs):
         if not self.validate_paymob_response(webhook_res, kwargs.get('hmac')):
-            print("sssssssssssssssss")
             raise PaymobWrongHmac()
         self.payment_transaction_identifier = webhook_res['obj']['order']['id']
         self.is_payment_done_successfully = webhook_res['obj']['success']
