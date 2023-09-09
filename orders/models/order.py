@@ -57,7 +57,7 @@ class Order(TimeStampedModel):
         else:
             self.status = OrderStatus.PENDING
             self.total = total
-
+            self.save()
             cart.current_order = self
             cart.save()
 
@@ -67,3 +67,6 @@ class Order(TimeStampedModel):
             order_line.cancel()
         cart.current_order = None
         cart.save()
+
+    def get_total_amount_for_payment(self):
+        return self.total

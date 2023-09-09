@@ -10,7 +10,7 @@ class PaymentProviderAbstract(ABC):
         self.name = name
 
     @abstractmethod
-    def get_payment_session_url(self, request) -> str:
+    def get_payment_session_url(self) -> str:
         pass
 
     @abstractmethod
