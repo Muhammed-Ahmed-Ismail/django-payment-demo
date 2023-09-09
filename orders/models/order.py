@@ -70,3 +70,7 @@ class Order(TimeStampedModel):
 
     def get_total_amount_for_payment(self):
         return self.total
+
+    def set_done(self):
+        self.status = OrderStatus.PAID
+        self.save()

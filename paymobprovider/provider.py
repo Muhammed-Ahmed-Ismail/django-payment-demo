@@ -18,7 +18,7 @@ class PaymobProvider(PaymentProviderAbstract):
 
     # response data
     payment_transaction_identifier = None
-    is_payment_done: bool = False
+    is_payment_done_successfully: bool = False
 
     def __init__(self, name, payment_transaction=None):
         super().__init__(name)
@@ -35,17 +35,22 @@ class PaymobProvider(PaymentProviderAbstract):
         self.request_payment_key()
 
     def is_payment_done(self) -> bool:
-        pass
+        return self.is_payment_done_successfully
 
     def parse_webhook_response(self, webhook_res, **kwargs):
         if not self.validate_paymob_response(webhook_res, kwargs.get('hmac')):
-            print("wrong hmac")
-
+            print("sssssssssssssssss")
             raise PaymobWrongHmac()
-        print("ssssssssssssssssssssssssssssss")
+        self.payment_transaction_identifier = webhook_res['obj']['order']['id']
+        self.is_payment_done_successfully = webhook_res['obj']['success']
 
     def get_payment_transaction(self) -> PaymentTransaction:
-        pass
+        transaction = PaymentTransaction.objects.filter(provider_id=self.payment_transaction_identifier,
+                                                        provider_name=self.name).first()
+        if not transaction:
+            raise ProviderException()
+
+        return transaction
 
     @classmethod
     def validate_paymob_response(cls, paymob_response, received_hmac=None) -> bool:
@@ -64,8 +69,6 @@ class PaymobProvider(PaymentProviderAbstract):
         for resp_key in approving_keys_list:
             if resp_key in nested_objects_set:
                 key_split = resp_key.split('.')
-                print(key_split)
-                print(paymob_response['obj'][key_split[0]][key_split[1]])
                 value = paymob_response['obj'][key_split[0]][key_split[1]]
                 if value == True:
                     con_values += 'true'

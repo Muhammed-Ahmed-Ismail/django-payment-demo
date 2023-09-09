@@ -10,3 +10,6 @@ class ProviderException(exceptions.APIException):
 class PaymobWrongHmac(exceptions.APIException):
     status_code = status.HTTP_403_FORBIDDEN
     default_detail = "Wrong response from paymob"
+
+
+

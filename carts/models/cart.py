@@ -28,3 +28,9 @@ class Cart(TimeStampedModel):
 
     def is_cart_has_current_order(self):
         return self.current_order is not None
+
+    def empty_cart_after_order_is_done(self):
+        self.current_order = None
+        for cart_line in self.cart_lines.all():
+            cart_line.delete()
+        self.save()

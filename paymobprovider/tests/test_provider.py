@@ -1,5 +1,10 @@
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, TestCase
 from paymobprovider.provider import PaymobProvider
+
+from payments.models import PaymentTransaction
+from orders.models import Order
+
+from django.contrib.auth import get_user_model
 
 
 class TestProvider(SimpleTestCase):
@@ -101,3 +106,26 @@ class TestProvider(SimpleTestCase):
         correct_hmac_sample = '5bf943235fed1b441731300c926c3112619d329c6888656fd4f27332f22c4801e5c4f3eea2ad34ff3c45a468ad115f887ac96134bf6f069bd622e131fb2033bd'
         assert PaymobProvider.validate_paymob_response(response_object_sample,
                                                        received_hmac=correct_hmac_sample) == True
+
+
+class test_payment_transaction(TestCase):
+    def setUp(self) -> None:
+        user = get_user_model().objects.create(
+            username='test',
+            password='123'
+        )
+        order = Order.objects.create(
+            user=user
+        )
+        transaction = PaymentTransaction.objects.create(
+            order=order,
+            amount=10.99,
+            provider_id=1002,
+            provider_name='paymob'
+        )
+
+        self.provider = PaymobProvider('paymob', transaction)
+        self.provider.payment_transaction_identifier = 1001
+
+    def test_get_payment_transaction(self):
+        assert self.provider.get_payment_transaction() is not None

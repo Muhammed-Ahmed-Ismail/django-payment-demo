@@ -34,4 +34,6 @@ class PaymentService:
         self.provider.parse_webhook_response(request.data, hmac=request.query_params.get('hmac'))
 
         if self.provider.is_payment_done():
-            pass
+            self.provider.get_payment_transaction().confirm_payment()
+        else:
+            self.provider.get_payment_transaction().notify_user_with_failed_payment_transaction()

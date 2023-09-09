@@ -16,8 +16,14 @@ class PaymentTransaction(TimeStampedModel):
     provider_id = models.BigIntegerField(null=True)
 
     def confirm_payment(self):
-        pass
+        self.status = PaymentTransactionStatus.DONE
+        self.order.set_done()
+        self.user.cart.empty_cart_after_order_is_done()
+        self.save()
 
     @property
     def user(self):
         return self.order.user
+
+    def notify_user_with_failed_payment_transaction(self):
+        pass
