@@ -4,6 +4,8 @@ from django_extensions.db.models import TimeStampedModel
 
 from django.contrib.auth import get_user_model
 
+from django.core.mail import send_mail
+
 from carts.models import Cart
 
 from products.models import Product
@@ -73,4 +75,15 @@ class Order(TimeStampedModel):
 
     def set_done(self):
         self.status = OrderStatus.PAID
+        self.send_email_for_user_with_done_state()
         self.save()
+
+    def send_email_for_user_with_done_state(self):
+        message = f"""
+            Dear {self.user.first_name or 'customer'},
+            
+            Your order with number S{self.id} done successfully!
+        """
+
+        return send_mail(subject='Order is Done', message=message, from_email="django-pay@gmail.com",
+                         recipient_list=[self.user.email], fail_silently=False)

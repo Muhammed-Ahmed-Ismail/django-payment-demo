@@ -125,7 +125,7 @@ class test_payment_transaction(TestCase):
         )
 
         self.provider = PaymobProvider('paymob', transaction)
-        self.provider.payment_transaction_identifier = 1001
+        self.provider.payment_transaction_identifier = 1002
 
     def test_get_payment_transaction(self):
         assert self.provider.get_payment_transaction() is not None
