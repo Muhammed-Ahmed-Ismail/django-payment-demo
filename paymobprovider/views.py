@@ -11,7 +11,6 @@ from payments.services import PaymentService
 @api_view(['POST'])
 @permission_classes([])
 def paymob_webhook(request: Request):
-    print('lllllllllllllllllllllllllllllll')
     payment_service: PaymentService = PaymentService('paymob')
     payment_service.close_payment_session(request)
     return Response()
@@ -20,5 +19,4 @@ def paymob_webhook(request: Request):
 @api_view(['GET'])
 @permission_classes([])
 def paymob_transaction_response_callback(request: Request):
-    print('getsssssssssssssssssssssssssss')
     return Response()
