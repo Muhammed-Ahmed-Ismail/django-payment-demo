@@ -57,7 +57,7 @@ class Order(TimeStampedModel):
         except OrderCreationException:
             raise ProductOutOfStock()
         else:
-            self.status = OrderStatus.PENDING
+            self.set_pending()
             self.total = total
             self.save()
             cart.current_order = self
@@ -87,3 +87,7 @@ class Order(TimeStampedModel):
 
         return send_mail(subject='Order is Done', message=message, from_email="django-pay@gmail.com",
                          recipient_list=[self.user.email], fail_silently=False)
+
+    def set_pending(self):
+        self.status = OrderStatus.PENDING
+        self.save()

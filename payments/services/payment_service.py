@@ -10,6 +10,8 @@ class PaymentService:
     provider: PaymentProviderAbstract = None
     provider_name: str = ""
 
+    provider_url: str = ""
+
     def __init__(self, provider_name: str):
         self.provider_name = provider_name
 
@@ -24,10 +26,10 @@ class PaymentService:
         )
         self.provider = PaymentProviderFactory.get_payment_provider(self.provider_name, payment_transaction)
 
-        return self.provider.get_payment_session_url()
+        self.provider_url = self.provider.get_payment_session_url()
 
     def get_payment_session_link(self) -> str:
-        return self.provider.get_payment_session_url()
+        return self.provider_url
 
     def close_payment_session(self, request: Request):
         self.provider = PaymentProviderFactory.get_payment_provider(self.provider_name)
