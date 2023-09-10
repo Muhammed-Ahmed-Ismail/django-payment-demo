@@ -11,7 +11,7 @@ class OrderTest(TestCase):
         user = get_user_model().objects.create(
             username='test',
             password='123',
-            email='user@gmail.com'
+            email='muhammedahmedos.alex42@gmail.com'
         )
 
         self.order = Order.objects.create(
